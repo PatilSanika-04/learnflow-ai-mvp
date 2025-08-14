@@ -1,81 +1,192 @@
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { BookOpen, Menu, User, Bell, Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { Menu, X, User, LogOut, BookOpen, BarChart3 } from "lucide-react";
+import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
-interface HeaderProps {
-  currentUser?: {
-    name: string;
-    role: 'admin' | 'instructor' | 'learner';
+export const Header = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
   };
-}
 
-export const Header = ({ currentUser }: HeaderProps) => {
+  const handleNavigation = (path: string) => {
+    navigate(path);
+    setIsMenuOpen(false);
+  };
+
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
-            <BookOpen className="h-8 w-8 text-primary" />
-            <span className="text-xl font-bold text-foreground">LearnHub</span>
+    <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+        {/* Logo */}
+        <div 
+          className="flex items-center space-x-2 cursor-pointer" 
+          onClick={() => navigate('/')}
+        >
+          <div className="w-8 h-8 bg-hero-gradient rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold text-sm">E</span>
           </div>
-          
-          <nav className="hidden md:flex items-center space-x-6 ml-8">
-            <a href="#" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
-              Courses
-            </a>
-            <a href="#" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
-              Dashboard
-            </a>
-            <a href="#" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
-              Analytics
-            </a>
-            <a href="#" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
-              Community
-            </a>
-          </nav>
+          <span className="font-bold text-xl">EduFlow</span>
         </div>
 
-        <div className="flex items-center space-x-4">
-          <div className="hidden md:flex items-center space-x-2">
-            <Search className="h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search courses..."
-              className="w-64"
-            />
-          </div>
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center space-x-8">
+          <button 
+            onClick={() => navigate('/')}
+            className="text-foreground hover:text-primary transition-colors"
+          >
+            Home
+          </button>
+          <button 
+            onClick={() => navigate('/courses')}
+            className="text-foreground hover:text-primary transition-colors"
+          >
+            Courses
+          </button>
+          {user && (
+            <button 
+              onClick={() => navigate('/dashboard')}
+              className="text-foreground hover:text-primary transition-colors"
+            >
+              Dashboard
+            </button>
+          )}
+          <a href="#features" className="text-foreground hover:text-primary transition-colors">
+            Features
+          </a>
+          <a href="#about" className="text-foreground hover:text-primary transition-colors">
+            About
+          </a>
+        </nav>
 
-          {currentUser ? (
-            <div className="flex items-center space-x-3">
-              <Bell className="h-5 w-5 text-muted-foreground hover:text-primary cursor-pointer transition-colors" />
-              <div className="flex items-center space-x-2">
-                <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center">
-                  <User className="h-4 w-4 text-white" />
-                </div>
-                <div className="hidden sm:block">
-                  <p className="text-sm font-medium text-foreground">{currentUser.name}</p>
-                  <Badge variant="secondary" className="text-xs">
-                    {currentUser.role}
-                  </Badge>
-                </div>
-              </div>
-            </div>
+        {/* CTA Buttons / User Menu */}
+        <div className="hidden md:flex items-center space-x-4">
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback>
+                      {user.email?.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">Account</p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {user.email}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate('/dashboard')}>
+                  <BarChart3 className="mr-2 h-4 w-4" />
+                  <span>Dashboard</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/courses')}>
+                  <BookOpen className="mr-2 h-4 w-4" />
+                  <span>My Courses</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Sign out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
-            <div className="flex items-center space-x-2">
-              <Button variant="ghost" size="sm">
+            <>
+              <Button variant="ghost" onClick={() => navigate('/auth')}>
                 Sign In
               </Button>
-              <Button variant="default" size="sm">
+              <Button onClick={() => navigate('/auth')}>
                 Get Started
               </Button>
-            </div>
+            </>
           )}
-
-          <Button variant="ghost" size="icon" className="md:hidden">
-            <Menu className="h-5 w-5" />
-          </Button>
         </div>
+
+        {/* Mobile Menu Button */}
+        <button
+          className="md:hidden"
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+        >
+          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
       </div>
+
+      {/* Mobile Menu */}
+      {isMenuOpen && (
+        <div className="md:hidden border-t bg-background">
+          <nav className="flex flex-col space-y-4 p-4">
+            <button 
+              onClick={() => handleNavigation('/')}
+              className="text-foreground hover:text-primary transition-colors text-left"
+            >
+              Home
+            </button>
+            <button 
+              onClick={() => handleNavigation('/courses')}
+              className="text-foreground hover:text-primary transition-colors text-left"
+            >
+              Courses
+            </button>
+            {user && (
+              <button 
+                onClick={() => handleNavigation('/dashboard')}
+                className="text-foreground hover:text-primary transition-colors text-left"
+              >
+                Dashboard
+              </button>
+            )}
+            <a href="#features" className="text-foreground hover:text-primary transition-colors">
+              Features
+            </a>
+            <a href="#about" className="text-foreground hover:text-primary transition-colors">
+              About
+            </a>
+            
+            <div className="flex flex-col space-y-2 pt-4">
+              {user ? (
+                <>
+                  <div className="text-sm text-muted-foreground border-b pb-2">
+                    Signed in as {user.email}
+                  </div>
+                  <Button variant="ghost" onClick={handleSignOut} className="justify-start">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign Out
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button variant="ghost" onClick={() => handleNavigation('/auth')}>
+                    Sign In
+                  </Button>
+                  <Button onClick={() => handleNavigation('/auth')}>
+                    Get Started
+                  </Button>
+                </>
+              )}
+            </div>
+          </nav>
+        </div>
+      )}
     </header>
   );
 };
