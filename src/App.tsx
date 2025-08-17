@@ -10,6 +10,16 @@ import Dashboard from "./pages/Dashboard";
 import BrowseCourses from "./pages/BrowseCourses";
 import MyCourses from "./pages/MyCourses";
 import Assignments from "./pages/Assignments";
+import Quizzes from "./pages/Quizzes";
+import Discussions from "./pages/Discussions";
+import Certificates from "./pages/Certificates";
+import Calendar from "./pages/Calendar";
+import Python from "./pages/courses/Python";
+import JavaScript from "./pages/courses/JavaScript";
+import Java from "./pages/courses/Java";
+import Cpp from "./pages/courses/Cpp";
+import ReactCourse from "./pages/courses/React";
+import NodeJS from "./pages/courses/NodeJS";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -57,7 +67,86 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route 
+              path="/quizzes" 
+              element={
+                <ProtectedRoute>
+                  <Quizzes />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/discussions" 
+              element={
+                <ProtectedRoute>
+                  <Discussions />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/certificates" 
+              element={
+                <ProtectedRoute>
+                  <Certificates />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/calendar" 
+              element={
+                <ProtectedRoute>
+                  <Calendar />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/courses/python" 
+              element={
+                <ProtectedRoute>
+                  <Python />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/courses/javascript" 
+              element={
+                <ProtectedRoute>
+                  <JavaScript />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/courses/java" 
+              element={
+                <ProtectedRoute>
+                  <Java />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/courses/cpp" 
+              element={
+                <ProtectedRoute>
+                  <Cpp />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/courses/react" 
+              element={
+                <ProtectedRoute>
+                  <ReactCourse />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/courses/nodejs" 
+              element={
+                <ProtectedRoute>
+                  <NodeJS />
+                </ProtectedRoute>
+              } 
+            />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
