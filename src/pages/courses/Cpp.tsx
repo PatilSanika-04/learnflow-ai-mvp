@@ -462,7 +462,9 @@ int main() {
                             <Play className="h-4 w-4 mr-2" />
                             Compile & Run
                           </Button>
-                          <Button size="sm" variant="outline">
+                          <Button size="sm" variant="outline" onClick={() => {
+                            navigator.clipboard.writeText(code).then(() => toast({ title: 'Copied!', description: 'Code copied to clipboard' }));
+                          }}>
                             Copy Code
                           </Button>
                         </div>

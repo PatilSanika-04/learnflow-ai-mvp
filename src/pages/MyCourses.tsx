@@ -29,6 +29,17 @@ interface Enrollment {
   courses: Course;
 }
 
+// Only keep programming-related courses
+const PROGRAMMING_KEYWORDS = [
+  'python','javascript','java','c++','cpp','react','node','node.js','nodejs',
+  'programming','development','backend','frontend','full stack','web development'
+];
+const isProgrammingCourse = (title?: string, category?: string) => {
+  const t = (title || '').toLowerCase();
+  const c = (category || '').toLowerCase();
+  return PROGRAMMING_KEYWORDS.some(k => t.includes(k) || c.includes(k));
+};
+
 const MyCourses = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -51,7 +62,8 @@ const MyCourses = () => {
       if (error) {
         console.error('Error fetching enrollments:', error);
       } else {
-        setEnrollments(data || []);
+        const filtered = (data || []).filter((e: any) => isProgrammingCourse(e.courses?.title, e.courses?.category));
+        setEnrollments(filtered);
       }
       setLoading(false);
     };

@@ -168,13 +168,34 @@ const Discussions = () => {
     }
 
     try {
+      // Find a related programming course to attach the discussion to
+      const { data: courseMatch } = await supabase
+        .from('courses')
+        .select('id, title')
+        .ilike('title', `%${newDiscussion.language}%`)
+        .eq('is_published', true)
+        .limit(1)
+        .single();
+
+      const courseIdToUse = courseMatch?.id;
+
+      if (!courseIdToUse) {
+        toast({
+          title: 'No Related Course Found',
+          description: 'Please create or publish a related course first, then try again.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
       const { error } = await supabase
         .from('discussions')
         .insert({
           title: newDiscussion.title,
           description: newDiscussion.description,
-          course_id: newDiscussion.language,
+          course_id: courseIdToUse,
           created_by: user.id,
+          is_pinned: false,
         });
 
       if (error) throw error;
@@ -386,7 +407,7 @@ const Discussions = () => {
                   <div className="text-sm text-muted-foreground">
                     Active discussion with {discussion.posts} replies
                   </div>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={() => toast({ title: 'Joined Discussion', description: `You joined: ${discussion.title}` })}>
                     Join Discussion
                   </Button>
                 </div>

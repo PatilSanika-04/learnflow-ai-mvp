@@ -205,9 +205,11 @@ student.add_grade(92)`
   };
 
   const startLesson = (moduleIndex: number, lessonIndex: number) => {
+    const lessonTitle = courseContent.modules[moduleIndex].lessons[lessonIndex].title;
+    setActiveLesson(lessonIndex);
     toast({
-      title: "Lesson Started",
-      description: `Starting: ${courseContent.modules[moduleIndex].lessons[lessonIndex].title}`,
+      title: 'Lesson Started',
+      description: `Starting: ${lessonTitle}`,
     });
   };
 
@@ -311,6 +313,47 @@ student.add_grade(92)`
                 </Card>
               ))}
             </div>
+
+            {/* Lesson Viewer with video & notes */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Lesson Viewer</CardTitle>
+                <CardDescription>Watch the lesson video and take notes</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="aspect-video w-full rounded-lg overflow-hidden border">
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    src={`https://www.youtube.com/embed/kqtD5dpn9C8`}
+                    title="Python lesson video"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    allowFullScreen
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Your Notes</label>
+                  <textarea
+                    className="w-full mt-2 p-3 rounded-md border bg-background"
+                    rows={6}
+                    placeholder="Write your notes here..."
+                    onChange={(e) => {
+                      try {
+                        const key = `lms:notes:${user?.id || 'anon'}:python:lesson-${activeLesson}`;
+                        localStorage.setItem(key, e.target.value);
+                      } catch {}
+                    }}
+                    defaultValue={() => {
+                      try {
+                        const key = `lms:notes:${user?.id || 'anon'}:python:lesson-${activeLesson}`;
+                        return localStorage.getItem(key) || '';
+                      } catch { return ''; }
+                    } as any}
+                  />
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="concepts" className="space-y-6">

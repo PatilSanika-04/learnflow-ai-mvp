@@ -309,9 +309,9 @@ const AdvancedApp = () => {
         />
         
         {/* Lazy Loading with Suspense */}
-        <Suspense fallback={<div>Loading component...</div>}>
-          <LazyComponent />
-        </Suspense>
+         <Suspense fallback={<div>Loading component...</div>}>
+           <LazyComponent />
+         </Suspense>
       </div>
     </ErrorBoundary>
   );

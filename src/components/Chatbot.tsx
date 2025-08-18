@@ -92,18 +92,24 @@ const Chatbot = ({ programmingLanguage = 'General Programming' }: ChatbotProps) 
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
       console.error('Chat error:', error);
+      const errMsg = (error as any)?.message || '';
+      const quota = errMsg.includes('429') || errMsg.toLowerCase().includes('insufficient_quota') || errMsg.toLowerCase().includes('quota');
+      const assistantContent = quota
+        ? 'Assistant temporarily unavailable due to API quota. Please try again later.'
+        : 'I apologize, but I\'m having trouble responding right now. Please try again in a moment.';
+
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: 'I apologize, but I\'m having trouble responding right now. Please try again in a moment.',
+        content: assistantContent,
         timestamp: new Date()
       };
       setMessages(prev => [...prev, errorMessage]);
       
       toast({
-        title: "Chat Error",
-        description: "Failed to get response from assistant. Please try again.",
-        variant: "destructive"
+        title: quota ? 'Assistant Unavailable' : 'Chat Error',
+        description: quota ? 'OpenAI quota exceeded. Please update the API key to restore the assistant.' : 'Failed to get response from assistant. Please try again.',
+        variant: 'destructive'
       });
     } finally {
       setLoading(false);

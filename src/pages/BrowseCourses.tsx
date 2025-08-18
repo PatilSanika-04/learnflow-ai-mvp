@@ -25,6 +25,17 @@ interface Course {
   } | null;
 }
 
+// Only keep programming-related courses
+const PROGRAMMING_KEYWORDS = [
+  'python','javascript','java','c++','cpp','react','node','node.js','nodejs',
+  'programming','development','backend','frontend','full stack','web development'
+];
+const isProgrammingCourse = (course: Course) => {
+  const title = (course.title || '').toLowerCase();
+  const category = (course.category || '').toLowerCase();
+  return PROGRAMMING_KEYWORDS.some(k => title.includes(k) || category.includes(k));
+};
+
 const BrowseCourses = () => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -48,8 +59,9 @@ const BrowseCourses = () => {
       if (error) {
         console.error('Error fetching courses:', error);
       } else {
-        setCourses(coursesData || []);
-        setFilteredCourses(coursesData || []);
+        const programmingOnly = (coursesData || []).filter(isProgrammingCourse);
+        setCourses(programmingOnly);
+        setFilteredCourses(programmingOnly);
       }
 
       // Fetch user's enrolled courses
@@ -156,9 +168,9 @@ const BrowseCourses = () => {
       <div className="space-y-8">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold">Browse Courses</h1>
+          <h1 className="text-3xl font-bold">Browse Programming Courses</h1>
           <p className="text-muted-foreground mt-2">
-            Discover programming courses and advance your skills
+            Discover coding courses and advance your skills
           </p>
         </div>
 

@@ -92,7 +92,18 @@ const Calendar = () => {
   ];
 
   useEffect(() => {
-    setEvents(sampleEvents);
+    // Load from localStorage if available, otherwise use sample
+    try {
+      const saved = localStorage.getItem('lms:events');
+      if (saved) {
+        const parsed: CalendarEvent[] = JSON.parse(saved).map((e: any) => ({...e, date: new Date(e.date)}));
+        setEvents(parsed);
+      } else {
+        setEvents(sampleEvents);
+      }
+    } catch {
+      setEvents(sampleEvents);
+    }
   }, []);
 
   const getDaysInMonth = (date: Date) => {
@@ -205,7 +216,21 @@ const Calendar = () => {
               Plan your study schedule and track important deadlines
             </p>
           </div>
-          <Button className="flex items-center gap-2">
+          <Button className="flex items-center gap-2" onClick={() => {
+            const title = prompt('Event title');
+            if (!title) return;
+            const newEvent = {
+              id: Date.now().toString(),
+              title,
+              type: 'lesson' as const,
+              date: new Date(),
+              time: '10:00',
+              course: 'My Course',
+              status: 'upcoming' as const,
+            };
+            setEvents((prev) => [...prev, newEvent]);
+            try { localStorage.setItem('lms:events', JSON.stringify([...events, newEvent])); } catch {}
+          }}>
             <Plus className="h-4 w-4" />
             Add Event
           </Button>

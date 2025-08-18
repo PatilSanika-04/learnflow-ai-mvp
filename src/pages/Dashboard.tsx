@@ -28,6 +28,17 @@ interface Enrollment {
   courses: Course;
 }
 
+// Only keep programming-related courses
+const PROGRAMMING_KEYWORDS = [
+  'python','javascript','java','c++','cpp','react','node','node.js','nodejs',
+  'programming','development','backend','frontend','full stack','web development'
+];
+const isProgrammingCourse = (title?: string, category?: string) => {
+  const t = (title || '').toLowerCase();
+  const c = (category || '').toLowerCase();
+  return PROGRAMMING_KEYWORDS.some(k => t.includes(k) || c.includes(k));
+};
+
 const Dashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -53,11 +64,15 @@ const Dashboard = () => {
       if (enrollmentsError) {
         console.error('Error fetching enrollments:', enrollmentsError);
       } else {
-        setEnrollments(enrollmentsData || []);
+        const filtered = (enrollmentsData || []).filter((e: any) => isProgrammingCourse(e.courses?.title, e.courses?.category));
+        setEnrollments(filtered);
       }
 
       // Fetch announcements
-      const courseIds = enrollmentsData?.map(e => e.courses?.id).filter(Boolean) || [];
+      const courseIds = (enrollmentsData || [])
+        .filter((e: any) => isProgrammingCourse(e.courses?.title, e.courses?.category))
+        .map((e: any) => e.courses?.id)
+        .filter(Boolean) as string[];
       const { data: announcementsData } = await supabase
         .from('announcements')
         .select('*')
@@ -74,7 +89,7 @@ const Dashboard = () => {
           *,
           courses!inner(*)
         `)
-        .in('courses.id', enrollmentsData?.map(e => e.courses?.id).filter(Boolean) || [])
+        .in('courses.id', courseIds)
         .gte('due_date', new Date().toISOString())
         .order('due_date', { ascending: true })
         .limit(5);

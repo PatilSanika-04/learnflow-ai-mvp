@@ -7,6 +7,7 @@ import { Progress } from '@/components/ui/progress';
 import { Award, Download, Calendar, CheckCircle, Clock, Trophy } from 'lucide-react';
 import LMSLayout from '@/components/LMSLayout';
 import { useAuth } from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 interface Certificate {
   id: string;
@@ -29,9 +30,22 @@ interface Enrollment {
 
 const Certificates = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const getCourseRoute = (language: string) => {
+    const map: Record<string, string> = {
+      'Python': '/courses/python',
+      'JavaScript': '/courses/javascript',
+      'Java': '/courses/java',
+      'C++': '/courses/cpp',
+      'React': '/courses/react',
+      'Node.js': '/courses/nodejs',
+    };
+    return map[language] || '/my-courses';
+  };
 
   const programmingCertificates = [
     {
@@ -400,7 +414,7 @@ const Certificates = () => {
                       <p className="text-sm text-muted-foreground mb-2">
                         {100 - course.progress}% remaining to earn certificate
                       </p>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={() => navigate(getCourseRoute(course.language))}>
                         Continue Learning
                       </Button>
                     </div>
@@ -423,7 +437,7 @@ const Certificates = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button className="mt-4">
+              <Button className="mt-4" onClick={() => navigate('/browse')}>
                 Browse Courses
               </Button>
             </CardContent>
