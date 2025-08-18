@@ -17,7 +17,10 @@ serve(async (req) => {
   try {
     const { message, programmingLanguage = 'General Programming', conversationHistory = [] } = await req.json();
 
+    console.log('Received request:', { message, programmingLanguage, historyLength: conversationHistory.length });
+
     if (!openAIApiKey) {
+      console.error('OpenAI API key not configured');
       throw new Error('OpenAI API key not configured');
     }
 
@@ -68,6 +71,8 @@ serve(async (req) => {
       content: message
     });
 
+    console.log('Calling OpenAI API with model: gpt-4o-mini');
+
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -87,10 +92,12 @@ serve(async (req) => {
     if (!response.ok) {
       const errorData = await response.json();
       console.error('OpenAI API error:', errorData);
-      throw new Error(`OpenAI API error: ${response.status}`);
+      throw new Error(`OpenAI API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
     }
 
     const data = await response.json();
+    console.log('OpenAI API response received successfully');
+    
     const assistantResponse = data.choices[0]?.message?.content || 'I apologize, but I encountered an error processing your request.';
 
     return new Response(JSON.stringify({ response: assistantResponse }), {

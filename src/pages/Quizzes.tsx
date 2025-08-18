@@ -8,6 +8,8 @@ import { Clock, Brain, Trophy, Play, CheckCircle } from 'lucide-react';
 import LMSLayout from '@/components/LMSLayout';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import QuizInterface from '@/components/QuizInterface';
+import { quizQuestions } from '@/data/quizQuestions';
 
 interface Quiz {
   id: string;
@@ -37,6 +39,7 @@ const Quizzes = () => {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [attempts, setAttempts] = useState<QuizAttempt[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeQuiz, setActiveQuiz] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchQuizzes = async () => {
@@ -74,7 +77,7 @@ const Quizzes = () => {
     fetchQuizzes();
   }, [user]);
 
-  const startQuiz = async (quizId: string) => {
+  const startQuiz = (quizId: string) => {
     if (!user) {
       toast({
         title: "Authentication Required",
@@ -84,27 +87,42 @@ const Quizzes = () => {
       return;
     }
 
+    setActiveQuiz(quizId);
+  };
+
+  const handleQuizComplete = async (score: number, totalQuestions: number) => {
+    if (!user || !activeQuiz) return;
+
     try {
       const { error } = await supabase
         .from('quiz_attempts')
         .insert({
           user_id: user.id,
-          quiz_id: quizId,
-          score: 0,
-          total_points: 0
+          quiz_id: activeQuiz,
+          score: score,
+          total_points: totalQuestions,
+          completed_at: new Date().toISOString()
         });
 
       if (error) throw error;
 
+      // Refresh attempts
+      const { data: attemptsData } = await supabase
+        .from('quiz_attempts')
+        .select('*')
+        .eq('user_id', user.id);
+      
+      setAttempts(attemptsData || []);
+
       toast({
-        title: "Quiz Started!",
-        description: "Good luck with your quiz.",
+        title: "Quiz Completed!",
+        description: `You scored ${score}/${totalQuestions} (${Math.round((score/totalQuestions)*100)}%)`,
       });
     } catch (error) {
-      console.error('Error starting quiz:', error);
+      console.error('Error saving quiz result:', error);
       toast({
         title: "Error",
-        description: "Failed to start quiz. Please try again.",
+        description: "Failed to save quiz results.",
         variant: "destructive"
       });
     }
@@ -197,6 +215,27 @@ const Quizzes = () => {
         </div>
       </LMSLayout>
     );
+  }
+
+  // Show quiz interface if a quiz is active
+  if (activeQuiz) {
+    const quiz = programmingQuizzes.find(q => q.id === activeQuiz);
+    const questions = quizQuestions[activeQuiz] || [];
+    
+    if (quiz && questions.length > 0) {
+      return (
+        <LMSLayout>
+          <QuizInterface
+            quizId={activeQuiz}
+            title={quiz.title}
+            questions={questions}
+            timeLimit={quiz.timeLimit}
+            onComplete={handleQuizComplete}
+            onExit={() => setActiveQuiz(null)}
+          />
+        </LMSLayout>
+      );
+    }
   }
 
   return (
